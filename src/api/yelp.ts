@@ -10,7 +10,7 @@ class YelpService {
     this.sdk.auth(`Bearer ${apiKey}`);
   }
 
-  async searchBusinesses(location: string, sortBy: SortBy = 'best_match', limit: number = 20) {
+  async searchBusinesses(location: string, sortBy: SortBy = 'best_match', limit: number = 20): Promise<any> {
     try {
       const response = await this.sdk.v3_business_search({
         location: location,
