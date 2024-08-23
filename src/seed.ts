@@ -1,5 +1,5 @@
 import admin from 'firebase-admin';
-import YelpService, { SortBy } from './api/yelp';
+import YelpService from './api/yelp';
 import dotenv from 'dotenv';
 import path from 'path';
 
@@ -29,16 +29,23 @@ async function seedRestaurants(location: string) {
     const businesses = await yelpService.searchBusinesses(location, 'best_match', 50);
 
     for (const business of businesses.businesses) {
-      // TODO: look for photo URL
       const restaurantData = {
         name: business.name,
-        location: new admin.firestore.GeoPoint(business.coordinates.latitude, business.coordinates.longitude),
+        location: new admin.firestore.GeoPoint(
+          business.coordinates.latitude, 
+          business.coordinates.longitude
+        ),
         address: `${business.location.address1}, ${business.location.city}, ${business.location.state} ${business.location.zip_code}`,
         phone: business.phone,
         website: business.url,
         yelpId: business.id,
+        imageUrl: business.image_url,
+        categories: business.categories.map((category: any) => category.title),
         averageRating: business.rating,
         totalRatings: business.review_count,
+        price: business.price || 'N/A',
+        businessHours: business.business_hours || [],
+        isClosed: business.is_closed,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       };
 
