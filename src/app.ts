@@ -3,6 +3,7 @@ import { config } from './config';
 import healthRoute from './routes/health';
 import dataRoute from './routes/data';
 import businessSearchRoute from './routes/businessSearch';
+import bookmarks from './routes/bookmarks'
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.use(express.json());
 app.use('/', healthRoute);
 app.use('/', dataRoute);
 app.use('/', businessSearchRoute);
+app.use('/', bookmarks)
 
 // Start the Server
 app.listen(config.port, () => {
