@@ -32,7 +32,7 @@ Backend service for the Toro Mobile Application, built with Express and TypeScri
 4. **Run the server:**
 
     ```bash
-    npx ts-node src/index.ts
+    npx ts-node src/app.ts
     ```
 
 ## Deployment
