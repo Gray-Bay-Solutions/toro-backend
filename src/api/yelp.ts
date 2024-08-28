@@ -10,6 +10,18 @@ class YelpService {
     this.sdk.auth(`Bearer ${apiKey}`);
   }
 
+  async getBusiness(id: string): Promise<any> {
+    try {
+      const response = await this.sdk.v3_business_info({
+        business_id_or_alias: id,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error searching business on Yelp:', error);
+      throw error;
+    }
+  }
+
   async searchBusinesses(location: string, sortBy: SortBy = 'best_match', limit: number = 20): Promise<any> {
     try {
       const response = await this.sdk.v3_business_search({
