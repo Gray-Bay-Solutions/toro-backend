@@ -8,7 +8,7 @@ if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
 }
 
 export const config = {
-  port: process.env.PORT || 3000,
+  port: process.env.PORT || 3001,
   yelpApiKey: process.env.YELP_API_KEY || '',
   firebaseServiceAccount: JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT),
   firebaseDatabaseUrl: process.env.FIREBASE_DATABASE_URL || '',
