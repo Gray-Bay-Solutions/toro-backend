@@ -128,6 +128,91 @@ router.delete('/restaurants/:id', async (req: Request, res: Response) => {
   }
 });
 
+// Get reviews by restaurant
+router.get('/restaurants/:id/reviews', async (req: Request, res: Response) => {
+  try {
+    // Get pagination parameters from query string
+    const limit = parseInt(req.query.limit as string) || 10;
+    const page = parseInt(req.query.page as string) || 1;
+    const offset = (page - 1) * limit;
+
+    // Get sorting parameters
+    // const sortBy = (req.query.sortBy as string) || 'timestamp';
+    // const sortOrder = (req.query.sortOrder as 'asc' | 'desc') || 'desc';
+
+    // Create the base query
+    let query = db.collection('reviews')
+      .where('restaurant_id', '==', req.params.id);
+      // .orderBy(sortBy, sortOrder);
+
+    // Get total count for pagination
+    const totalSnapshot = await query.count().get();
+    const total = totalSnapshot.data().count;
+
+    // Apply pagination
+    query = query.limit(limit).offset(offset);
+
+    // Execute the query
+    const snapshot = await query.get();
+    
+    // Format the reviews
+    const reviews = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      // Ensure timestamp is serializable
+      timestamp: doc.data().timestamp?.toDate?.()?.toISOString() || doc.data().timestamp
+    }));
+
+    // Send response with pagination metadata
+    res.json({
+      data: reviews,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching restaurant reviews:', error);
+    res.status(500).json({ 
+      error: 'Internal Server Error',
+      message: error
+    });
+  }
+});
+
+// Reviews Endpoints
+router.get('/reviews', async (req: Request, res: Response) => {
+  try {
+    const snapshot = await db.collection('reviews').get();
+    const reviews = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    res.json(reviews);
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+// Users Endpoints
+router.get('/users', async (req: Request, res: Response) => {
+  try {
+    const snapshot = await db.collection('users').get();
+    const users = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 // Scraping Control Endpoints
 router.post('/scraping/start', async (req: Request, res: Response) => {
   try {

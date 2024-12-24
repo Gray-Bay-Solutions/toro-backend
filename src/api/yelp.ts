@@ -22,12 +22,24 @@ class YelpService {
     }
   }
 
-  async searchBusinesses(location: string, sortBy: SortBy = 'best_match', limit: number = 20): Promise<any> {
+  async searchBusinesses(
+    location: string,
+    sortBy: SortBy = 'best_match',
+    limit: number = 20,
+    options: {
+      offset?: number;
+      term?: string;
+      radius?: number;
+    } = {}
+  ): Promise<any> {
     try {
       const response = await this.sdk.v3_business_search({
-        location: location,
+        location,
         sort_by: sortBy,
-        limit: limit,
+        limit,
+        offset: options.offset || 0,
+        term: options.term || 'restaurants',
+        radius: options.radius || 8000
       });
       return response.data;
     } catch (error) {

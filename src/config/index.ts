@@ -12,4 +12,5 @@ export const config = {
   yelpApiKey: process.env.YELP_API_KEY || '',
   firebaseServiceAccount: JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT),
   firebaseDatabaseUrl: process.env.FIREBASE_DATABASE_URL || '',
+  googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY || '',
 };
