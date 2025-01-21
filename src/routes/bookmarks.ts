@@ -3,24 +3,25 @@ import { db } from '../api/firebase';
 
 const router = Router();
 
-router.get('/bookmarks', async (req: Request, res: Response) => {
+// GET /bookmarks - Get all bookmarked restaurants for a user
+router.get('/', async (req: Request, res: Response) => {
   try {
     const { userId } = req.query;
 
     if (!userId) {
-      return res.status(400).send('userId is required');
+      return res.status(400).json({ error: 'userId is required' });
     }
 
     // Get the list of bookmarked restaurant IDs for the user
     const bookmarksSnapshot = await db.collection('users')
-                                      .doc(userId.toString())
-                                      .collection('bookmarks')
-                                      .get();
+      .doc(userId.toString())
+      .collection('bookmarks')
+      .get();
 
     const restaurantIds = bookmarksSnapshot.docs.map(doc => doc.data().restaurantId);
 
     if (restaurantIds.length === 0) {
-      return res.json([]); // Return an empty array if there are no bookmarks
+      return res.json([]);
     }
 
     // Query the restaurants collection to get the restaurant documents
@@ -31,13 +32,15 @@ router.get('/bookmarks', async (req: Request, res: Response) => {
 
     const restaurants = restaurantDocs
       .filter(doc => doc.exists)
-      .map(doc => doc.data());
+      .map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
 
-    // Return the restaurant documents
     res.json(restaurants);
   } catch (error) {
     console.error('Error fetching bookmarks:', error);
-    res.status(500).send('Internal Server Error');
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 

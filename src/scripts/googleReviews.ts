@@ -1,8 +1,8 @@
 // src/scripts/googleReviews.ts
 import { db } from '../api/firebase';
 import { config } from '../config';
-import { 
-    Client, 
+import {
+    Client,
     PlaceInputType
 } from '@googlemaps/google-maps-services-js';
 import admin from 'firebase-admin';
@@ -51,15 +51,15 @@ async function updateRestaurantReviews() {
         await deleteAllReviews();
         const restaurantsSnapshot = await db.collection('restaurants').get();
         console.log(`Found ${restaurantsSnapshot.size} restaurants in the database`);
-        
+
         for (const doc of restaurantsSnapshot.docs) {
             const restaurant = doc.data();
             console.log(`\nProcessing restaurant: ${restaurant.name}`);
-            
+
             try {
                 // If we have a Google Place ID stored, use it directly
                 const placeId = restaurant.google_place_id;
-                
+
                 if (!placeId) {
                     console.warn(`No Google Place ID for restaurant: ${restaurant.name}`);
                     continue;
@@ -87,7 +87,7 @@ async function updateRestaurantReviews() {
 
                 for (const review of topReviews) {
                     const timestamp = parseTimestamp(review.time);
-                    
+
                     if (!timestamp) {
                         console.warn(`Invalid timestamp for review: ${review.time}`);
                         continue;
@@ -117,22 +117,22 @@ async function updateRestaurantReviews() {
                     // Create a consistent ID format for Google reviews
                     const reviewId = `google_${doc.id}_${review.time}_${review.author_name}`
                         .replace(/[.#$\[\]]/g, '_');
-                    
+
                     await db.collection('reviews').doc(reviewId).set(reviewData, { merge: true });
                 }
-                
+
                 console.log(`Successfully processed top ${topReviews.length} Google reviews for: ${restaurant.name}`);
                 // Rate limit delay
                 await new Promise(resolve => setTimeout(resolve, 1000));
-                
+
             } catch (error) {
                 console.error(`Error processing restaurant ${restaurant.name}:`, error);
                 continue;
             }
         }
-        
+
         console.log('\nFinished updating all restaurant Google reviews');
-        
+
     } catch (error) {
         console.error('Error updating restaurant reviews:', error);
         throw error;

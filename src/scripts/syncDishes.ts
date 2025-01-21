@@ -37,7 +37,7 @@ async function getDishesForRestaurants() {
                 // Get menu data from Yelp if available
                 if (restaurant.yelp_id) {
                     const yelpDetails = await yelpService.getBusiness(restaurant.yelp_id);
-                    
+
                     // Some restaurants might have menu items in the Yelp response
                     if (yelpDetails?.menu_items?.length) {
                         for (const item of yelpDetails.menu_items) {
