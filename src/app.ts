@@ -8,7 +8,6 @@ import bookmarks from './routes/bookmarks';
 
 const app = express();
 
-// CORS Configuration
 const allowedOrigins = [
   // Development origins
   'http://localhost:3000',
@@ -18,60 +17,66 @@ const allowedOrigins = [
   'https://toroeats.com',
   'https://www.toroeats.com',
   'https://toro-backend-nine.vercel.app',
+  'https://toro-frontend-seven.vercel.app',
   
   // FlutterFlow origins
   'https://app.flutterflow.io',
   /\.flutterflow\.io$/,
-  
-  // Add your FlutterFlow app URL when you have it
-  process.env.FLUTTERFLOW_URL
-].filter(Boolean); // Remove any undefined values
+];
 
-const corsOptions = {
-  origin: function (origin: any, callback: any) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    // Check if the origin matches any FlutterFlow domains
-    const isFlutterFlowOrigin = origin.includes('flutterflow.io');
-    
-    if (isFlutterFlowOrigin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
+const corsOptions = process.env.NODE_ENV === 'production' 
+  ? {
+      // Strict production configuration
+      origin: allowedOrigins.filter(origin => origin !== '*'),
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+      allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'X-Requested-With',
+        'Accept',
+        'Origin',
+        'Access-Control-Allow-Origin',
+        'Access-Control-Allow-Methods',
+        'Access-Control-Allow-Headers'
+      ],
+      maxAge: 86400,
+      preflightContinue: false,
+      optionsSuccessStatus: 204
     }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-Requested-With',
-    'Accept',
-    'Origin',
-    'Access-Control-Allow-Origin',
-    'Access-Control-Allow-Methods',
-    'Access-Control-Allow-Headers'
-  ],
-  credentials: true, // Enable cookies and credentials
-  maxAge: 86400, // Cache preflight requests for 24 hours
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-};
+  : {
+      // Development configuration
+      origin: '*',
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+      allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'X-Requested-With',
+        'Accept',
+        'Origin',
+        'Access-Control-Allow-Origin',
+        'Access-Control-Allow-Methods',
+        'Access-Control-Allow-Headers'
+      ],
+      maxAge: 86400,
+      preflightContinue: false,
+      optionsSuccessStatus: 204
+    };
 
 // Enable CORS with options
 app.use(cors(corsOptions));
 
-// Security headers middleware
+// Update the security headers middleware
 app.use((req, res, next) => {
+  // Remove or modify CORS-related headers that might conflict
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
-  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   
-  // Add specific headers for FlutterFlow if needed
-  if (req.headers.origin?.includes('flutterflow.io')) {
-    res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  // Only set HSTS in production
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
   }
   
   next();
