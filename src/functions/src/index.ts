@@ -26,8 +26,10 @@ export const updateDishReviewStats = functions.firestore
 
       // Calculate new review count and average rating
       const newReviewCount = currentReviewCount + 1;
-      const newAverageRating =
-        (currentAverageRating * currentReviewCount + rating) / newReviewCount;
+      const newAverageRating = Number(
+        ((currentAverageRating * currentReviewCount + rating) /
+          newReviewCount).toFixed(1)
+      );
 
       // Update the dish document with the new review count and average rating
       await dishRef.update({
